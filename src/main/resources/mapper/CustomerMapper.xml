@@ -1,0 +1,72 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pegasus.dao.CustomerMapper">
+	
+	<sql id="customer_column">
+	<!-- table column names-->
+		id,name,creDate
+	</sql>
+	
+	<!-- <insert id="insertCustomer" parameterType="Customer" useGeneratedKeys="true" keyProperty="id" > -->
+	<insert id="insertCustomer" parameterType="Customer" >
+		<selectKey keyProperty="id" resultType="String" order="BEFORE">
+            select replace(uuid(),'-','') from dual
+        </selectKey>
+		insert into tbl_customer (<include refid="customer_column"></include>)
+		values
+		<!-- domain property names -->
+		(#{id},#{name},#{creDate})
+	</insert>
+
+	<delete id="deleteCustomerById" parameterType="String" >
+		delete from tbl_customer where id=#{id}
+	</delete>
+	
+	<delete id="batchDeleteCustomerById" >  
+            delete from tbl_customer where id in  
+            <foreach collection="array" item="id" open="(" separator="," close=")">  
+                #{id}  
+            </foreach>  
+     </delete>  
+	
+	<update id="updateCustomerById" parameterType="Customer">
+		update tbl_customer set 
+		name=#{name},creDate=#{creDate}
+		where id=#{id}
+	</update>
+	
+	<select id="findAll" resultType="Customer" resultMap="customerResultMap">
+		select *
+		from tbl_customer
+	</select>
+	
+	<select id="selectByName" parameterType="String" resultMap="customerResultMap">
+		select<include refid="customer_column" />
+		from tbl_customer
+		where name=#{name}
+	</select>
+	
+	<select id="selectById" parameterType="String" resultMap="customerResultMap">
+		select<include refid="customer_column" />
+		from tbl_customer
+		where id=#{id}
+	</select>
+	
+	<select id="selectByIds" resultMap="customerResultMap">
+	
+		select * from tbl_customer where id in
+		<foreach collection="array" item="id" separator="," open="(" close=")">
+			#{id}
+		</foreach>
+	</select>
+	
+	
+	<resultMap type="Customer" id="customerResultMap">
+		<id property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="creDate" column="creDate"/>
+	
+	</resultMap>
+	
+</mapper>

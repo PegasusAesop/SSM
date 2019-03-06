@@ -1,0 +1,22 @@
+.mypostion{
+	position:relative;
+	left:10px;
+}
+/* th,td{
+	
+	border:1px solid #ccc;
+	color:green;
+} */
+
+tr.odd{
+  background-color: #8080c0;
+ 
+}
+.center{
+	
+	left:50%;
+	top:50%;
+	width:50%; 
+	height:50%;
+	transform:translate(-50%,-50%);
+}

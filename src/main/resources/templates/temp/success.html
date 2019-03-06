@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+ <head th:replace="/common/common :: common_header(~{::title},~{::link},~{})">
+ <title>SUCCESS</title>
+ <link rel="stylesheet" th:href="@{/css/style.css}">
+ <script type="text/javascript" th:inline="javascript">
+ 
+	$(function(){	
+		
+		listAll("#tBodyId");
+	})
+	
+	function listAll(bodyId){
+		
+		$(bodyId).html("");
+		
+		$.ajax({
+			url:"/springboot/ajax/listProducts.do",
+			type:"post",	//4请求方式：post/get
+			async:true,	//ajax模式;默认异步；
+			dataType:"json", 	//5返回值的类型：text:普通文本：json:json文本
+			success:function(data){ 	//6回调函数 data:返回值；		
+				//alert(data);
+				 var i=1;
+ 				$(data).each(function(){
+					//1每一个json用this来表示；
+					$(bodyId).append("<tr><td>"+this.name+"</td><td>"+this.price+"</td><td>"+this.inStock+"</td><td>评价</td></tr>");
+				})  
+				
+			},
+			error:function(){
+				alert("PL check service.");
+			}
+		})
+	}
+</script>
+</head>
+
+ <body>
+	<div th:include="common/header::headerFragment"></div>
+	
+	 <h3>登录成功，欢迎你：<span th:if="${material}!=null" th:text="${material.name}"></span></h3>
+
+
+	 <img src="/springboot/images/win.jpg" th:src="@{/images/win.jpg}" alt="" />hello
+	 <img src="/springboot/images/win.jpg" th:src="@{/customer/exportFileByName.do}" alt="" style="width:600px;height:400px;border:2px solid #f40;" />hello
+	 
+	 
+	 
+	<div th:insert="common/footer::copyFragment">&copy; 2011 The Static Templates</div>
+ </body>
+  
+</html>
+

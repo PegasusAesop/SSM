@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="common_header(title,links,scripts)">
+
+	<meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+	<title th:replace="${title}">ZSET common template of html</title>
+	<!-- Common styles and scripts -->
+	<link rel="shortcut icon" href="/springboot/favicon.ico" th:href="@{/favicon.ico}"/>
+	<link rel="bookmark" href="/springboot/favicon.ico" th:href="@{/favicon.ico}"/>
+	<!-- Bootstrap -->
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+	<link rel="stylesheet" type="text/css" media="all" href="../../css/gtvg.css" th:href="@{/css/gtvg.css}"/>
+	<script type="text/javascript" th:src="@{/js/jquery-3.3.1.min.js}"></script>
+	<script type="text/javascript" th:src="@{/js/bootstrap.min.js}"></script>
+ 
+	<!--/* Per-page placeholder for additional links */-->
+	<th:block th:replace="${links}" />
+	<th:block th:replace="${scripts}" />
+
+</head>
+    
+</html>
+

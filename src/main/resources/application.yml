@@ -1,0 +1,58 @@
+spring:
+  profiles:
+    active: dev
+    
+---
+server:
+  port: 8001
+  servlet:
+    context-path: "/springboot"
+   
+#配置debug模式
+#debug: true
+   
+#配置logging级别    
+logging:
+  level:
+    web: ALL
+       
+spring:
+  profiles: dev
+  #spring.messages.basename:默认是在resources根目录下的messages.propertes文件名；
+  messages: 
+  #多个resources文件的配置方式：
+   basename: "i18n/home,i18n/subscrible"
+#  mvc:
+#    favicon:
+#      enabled: true
+  thymeleaf:
+    cache: false #不启用缓存
+#配置datasource数据源    
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    #useUnicode=true&useSSL=true&characterEncoding=utf8&serverTimezone=GMT%2B8 Hongkong Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/springboot?&serverTimezone=Asia/Shanghai&CharacterEncoding=utf8
+    username: root
+    password: 321654
+    initialSize: 5
+    maxActive: 100
+    minIdle: 3
+    maxWait: 50000
+
+#配置mybatis
+mybatis:
+  type-aliases-package: com.pegasus.domain   #定义别名typeAliases
+  mapper-locations: classpath:mapper/*.xml    
+        
+---
+spring:
+  profiles: test  
+server:
+ port: 8082
+ 
+---
+spring:
+  profiles: prod
+server:
+ port: 8083
+ 

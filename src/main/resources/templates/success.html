@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+ <head th:replace="/common/common :: common_header(~{::title},~{::link},~{::script})">
+ <title>SUCCESS</title>
+ <link rel="stylesheet" th:href="@{/css/style.css}">
+ <script type="text/javascript" th:inline="javascript">
+ 
+	$(function(){	
+		
+		//listAll("#tBodyId");
+		$("#importConfirmBtn").click(function(){
+			$("#importAuthorForm").submit();
+		})
+	})
+	
+	function listAll(bodyId){
+		
+		$(bodyId).html("");
+		
+		$.ajax({
+			url:"/springboot/ajax/listProducts.do",
+			type:"post",	//4请求方式：post/get
+			async:true,	//ajax模式;默认异步；
+			dataType:"json", 	//5返回值的类型：text:普通文本：json:json文本
+			success:function(data){ 	//6回调函数 data:返回值；		
+				//alert(data);
+				 var i=1;
+ 				$(data).each(function(){
+					//1每一个json用this来表示；
+					$(bodyId).append("<tr><td>"+this.name+"</td><td>"+this.price+"</td><td>"+this.inStock+"</td><td>评价</td></tr>");
+				})  
+				
+			},
+			error:function(){
+				alert("PL check service.");
+			}
+		})
+	}
+</script>
+</head>
+
+ <body>
+	<div th:include="common/header::headerFragment"></div>
+	
+	 <h3 >登录成功，欢迎你：<span th:if="${material}!=null" th:text="${material.name}"></span></h3>
+
+	 <img src="/springboot/images/win.jpg" th:src="@{/images/win.jpg}" alt="" />hello
+	 
+	 <img src="/springboot/author/findAuthorById.do" th:if="${session.author}!=null"  
+	 		th:src="@{/author/findAuthorById.do}" th:title="${'author id is :'+session.author.id}"  
+	 		th:alt="${session.author.id}" style="width:150px;height:150px;border:1px solid #f40"/>test
+	 
+	 <button type="button" class="btn btn-default" data-toggle="modal" data-target="#importAuthorModal" >
+		<span class="glyphicon glyphicon-import" aria-hidden="true"></span>导入
+	</button>
+	 
+	 <!-- Modal_import -->
+	<div class="modal fade" id="importAuthorModal" tabindex="-1" role="dialog" aria-labelledby="addLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="myModalLabel">添加图片</h4>
+	      </div>
+	      <div class="modal-body">
+	      <form th:action="@{/author/addAuthor.do}" method="post" enctype="multipart/form-data" id="importAuthorForm">
+			
+		    <p>请导入文件：<input type="file" name="file" id="add_nameId" /><span id="add_msg"></span></p>
+	
+			</form>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+	        <button type="button" id="importConfirmBtn" class="btn btn-primary">上传</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+	 
+	<a href="#">回到最顶端</a>
+	<div th:insert="common/footer::copyFragment">&copy; 2011 The Static Templates</div>
+ </body>
+  
+</html>
+

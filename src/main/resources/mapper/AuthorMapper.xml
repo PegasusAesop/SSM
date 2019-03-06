@@ -1,0 +1,63 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pegasus.dao.AuthorMapper">
+	
+	<!-- <insert id="insertCustomer" parameterType="Customer" useGeneratedKeys="true" keyProperty="id" > -->
+	<insert id="insertAuthor" parameterType="Author" useGeneratedKeys="true" keyProperty="id" >
+		insert into tbl_author (img)
+		values
+		<!-- domain property names -->
+		(#{img})
+	</insert>
+	
+	<select id="selectAuthorById" resultMap="AuthorResultMap">
+		select *
+		from tbl_author where
+		id=#{id}
+		
+	</select>
+	
+	<resultMap type="Author" id="AuthorResultMap">
+		<id property="id" column="id"/>
+		<result property="img" column="img"/>
+	</resultMap> 
+	
+<!-- 
+	<delete id="deleteCustomerById" parameterType="String" >
+		delete from tbl_customer where id=#{id}
+	</delete>
+	
+	<delete id="batchDeleteCustomerById" >  
+            delete from tbl_customer where id in  
+            <foreach collection="array" item="id" open="(" separator="," close=")">  
+                #{id}  
+            </foreach>  
+     </delete>  
+	
+	<update id="updateCustomerById" parameterType="Customer">
+		update tbl_customer set 
+		name=#{name},creDate=#{creDate}
+		where id=#{id}
+	</update>
+	
+	<select id="selectByName" parameterType="String" resultMap="customerResultMap">
+		select<include refid="customer_column" />
+		from tbl_customer
+		where name=#{name}
+	</select>
+	
+	<select id="selectById" parameterType="String" resultMap="customerResultMap">
+		select<include refid="customer_column" />
+		from tbl_customer
+		where id=#{id}
+	</select>
+	
+	<select id="selectByIds" resultMap="customerResultMap">
+		select * from tbl_customer where id in
+		<foreach collection="array" item="id" separator="," open="(" close=")">
+			#{id}
+		</foreach>
+	</select> -->
+	
+</mapper>

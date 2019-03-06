@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+ <head th:replace="/common/common :: common_header(~{::title},~{::link},~{::script})">
+ <title>主页||中兴新力成本数据库</title>
+ 
+ <!-- <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"> -->
+ <link rel="stylesheet" th:href="@{/css/style.css}">
+ 
+ <script type="text/javascript">
+ 
+	 $(function(){
+		 //
+		 setInterval(showImg,3000);
+		 //0新增修改时name值验证；
+		 validate("#add_nameId","#add_msg");
+		 validate("#edit_nameId","#edit_msg")
+		 //listAll("#tBody");
+		 //1增加项目
+		 $("#saveConfirmBtn").click(function(){
+			//alert(1111);
+			$("#addCustomerForm").submit();
+		})
+		//2删除一条或多条项目
+		$("#delItems").click(function(){
+			deletes("#delItems");
+		})
+		//3修改项目；
+		$("#editConfirmBtn").click(function(){
+			$("#editCustomerForm").submit();
+		})
+		//4转化为excel，并导出全部项目
+		$("#exportAllBtn").click(function(){
+			if(confirm("确定导出所有吗？")){
+				window.location.href="exportAll.do";
+				this.disabled=true;
+			}
+		})
+		//4选中部分项目，转化为excel并导出到本地；
+		$("#exportCkdBtn").click(function(){
+			if($(":checkbox[name='mycc']:checked").length==0){
+				alert("请确保至少选 中一条项目...");
+				return;
+			}
+			if(confirm("确定导出选择吗？")){
+				var sendData="";
+				$.each($(":checkbox[name='mycc']:checked"),function(i,n){
+					sendData +="&id=" + n.value;
+				});
+				sendData = sendData.substr(1);
+				window.location.href="exportCkdAll.do?"+sendData;
+				
+				
+			}else{
+				$("input[name='mycc']:checked").attr("checked",false);
+				window.location.href=window.location.href;
+			}
+		})
+		
+		$("#importConfirmBtn").click(function(){
+			
+			$("#importCustomerForm").submit();
+		})
+		
+	 })
+	 
+	 function showImg(){
+		 var number=Math.ceil(Math.random()*6);//aa有几张图片就乘以几；
+		 //1两种方法
+		// document.getElementById("img").src="/springboot/images/"+number+".jpg";//随机显示的话可以用随机函数来生成相应的图片名
+		 $("#img").attr("src","/springboot/images/"+number+".jpg");
+	 }
+	 
+	 function listAll(posiId){
+		$(posiId).html("");
+		 
+		$.ajax({
+			url:"customer/findByPage.do?pageNum="+1,//2请求路径；
+			//data:"random="+Math.random(),	//3参数 
+			data:{"p":Math.random()}, //json格式传参给servlet;
+			type:"post",	//4请求方式：post/get
+			async:true,	//ajax模式;默认异步；
+			dataType:"json", 	//5返回值的类型：text:普通文本：json:json文本
+			success:function(data){ 	//6回调函数 data:返回值；		
+				//json取值方式：
+				//alert(data);
+				var i=1;
+ 				/* $.each(data,function(j,customer){
+					//1每一个json用this来表示；
+					$("#tBody").append("<tr><td>"+(i++)+"</td><td>"+customer.name+"</td><td>"+customer.creDate+"</td><td>操作</td></tr>");
+				})   */
+				
+				$(data.list).each(function(){
+					//2每一个json用this来表示；
+					$("#tBody").append("<tr><td><input type='checkbox' id='qx'/></td><td>"+(i++)+"</td><td>"+this.name+"</td><td>"+this.creDate+"</td><td>操作</td></tr>");
+				}) 
+				
+			},
+			error:function(){
+				alert("请确定服务器是否真的打开了哦！");
+			}
+		})
+	 }
+	 
+		//1多条删除操作
+		function deletes(delItems){	
+			// 2判断是否至少选择一项 
+			var checkedNum = $("input[name='mycc']:checked").length; 
+			//var checkedNum = $(":checkbox[name='mycc']:checked").size(); --?
+			if(checkedNum == 0) { 
+				alert("请确保至少选中一条项目..."); 
+				return; 
+			}
+			if(confirm("确定要删除所选项目？")){
+				var arr = new Array();
+				$("input[name='mycc']:checked").each(function(i){
+					arr.push($(this).val());
+				});
+				
+				//console.log(arr);
+				//alert("arr:"+arr)
+				//将checkbox选中的项通过ajax方式提交并获得反应；
+				$.ajax({
+					type:"post",
+					url:"/springboot/customer/batchDeleteByIds.do",
+					//1将获得的序号数组传递到后台；
+					data:{"delItems":arr.toString()},
+					dataType:"text",
+					success:function(data){
+						//alert(data);
+						//$("input[name='mycc']:checked").attr("checked",false);
+						//window.location.reload();
+						window.location.href=window.location.href;
+					},
+					error:function(){
+						alert("PL check service.");
+					}
+				})
+			}
+			else{
+				//1确定误操作后，将选中的恢复，并重刷下页面！
+				$("input[name='mycc']:checked").attr("checked",false);
+				window.location.href=window.location.href;
+			}
+		}
+		
+		function OriginalValues(){
+			
+			 var $chkBoxes = $("#customerTable").find("input:checked");
+			 if($chkBoxes.length!=1){
+				 alert("没有选数据或超过了一条数据...");
+				 window.location.href=window.location.href;
+				 return;
+			 }
+
+			 var checkedId = $("input[name='mycc']:checked").val();
+			 //alert(checkedId);
+			$("#edit_customerId").val(checkedId);
+			//1js中遍历checkbox 选中的行中的某列的值；
+			var test = $('input[type=checkbox]:checked').closest('tr').find('td:eq(1)')
+			.map(function(){return this.innerHTML}).get().join();
+			//alert(test);
+			
+			var name = $('input[type=checkbox]:checked').closest('tr').find('td:eq(2)')
+			.map(function(){return this.innerHTML}).get().join();
+			//alert(name);
+			$("#edit_nameId").val(name);
+			
+			var creDate = $('input[type=checkbox]:checked').closest('tr').find('td:eq(3)')
+			.map(function(){return this.innerHTML}).get().join();
+			//alert(creDate);
+			$("#edit_creDateId").val(creDate);
+
+		 }
+		
+		function validate(fieldId,msg){
+			$(fieldId).blur(function(){
+				//1.空字符串时不反应；
+				var name=$(fieldId).val();
+				if(name==""){
+					return;
+				}
+				//2引入ajax请求:验证输入name是否存在服务器中？
+				$.ajax({
+					url:"/springboot/customer/findByName.do",
+					data:{"name":name,"p":Math.random()},
+					success:function(data){
+						//alert(data);
+						$(msg).html(data);
+					},
+					dataType:"text",
+					error:function(){
+						
+						alert("confirm the servce is starting!");
+					}
+				})
+			})
+		}
+		
+</script>
+</head>
+ <body>
+ 
+     <!-- <div th:include="/common/header::headerFragment"></div> -->
+ 	 <img src="/springboot/images/1.jpg" th:src="@{/images/1.jpg}" id="img">目标达成 客户满意 顺利收款
+     <hr style="color:green;">
+    <!--  <div class="mypostion">
+              今天是: <span style="color:#f40;" th:with="df=#{date.format}" th:text="${#calendars.format(#calendars.createNow(),df)}">13 February 2011</span>
+    </div> -->
+    
+    <select name="compayName" >
+    	<option  th:each="name:${names}" >[[${name}]]</option>
+    </select>
+    
+   <a href="/springboot/customer/exportFileByName.do">文件下载</a>
+   
+     <div class="mypostion">
+	     <div class="page-header">
+	  	 <h3>客户信息列表 <small>信息维护</small></h3>
+		</div>
+	</div>
+	
+	<div class="mypostion">
+		<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addModal" >
+		<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>新增
+		</button>
+		
+		<button type="button" class="btn btn-danger" id="delItems">
+		<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>删除
+		</button>
+		
+		<button type="button" id="editBtn" class="btn btn-primary" data-toggle="modal" data-target="#editModal" th:onclick="'javascript:OriginalValues()'">
+		<span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>修改
+		</button>
+		
+		<button type="button" class="btn btn-default" data-toggle="modal" data-target="#importModal" >
+		<span class="glyphicon glyphicon-import" aria-hidden="true"></span>导入
+		</button>
+		
+		<button type="button" class="btn btn-default" id="exportCkdBtn">
+		<span class="glyphicon glyphicon-export" aria-hidden="true"></span>导出选中
+		</button>
+		
+		<button type="button" class="btn btn-default" id="exportAllBtn">
+		<span class="glyphicon glyphicon-export" aria-hidden="true"></span>导出所有
+		</button>
+	</div>
+    <!-- aa表格显示 -->
+    <div class="mypostion">  
+	    <table class="table table-hover" id="customerTable" style="font-size:16px;">
+			<thead>
+			<tr>
+				<!-- <td><input type="checkbox" id="qx" /></td> -->
+				<th>海选</th>
+				<th>序号</th>
+				<th>名称</th>
+				<th>合作开始时间</th>
+				<th>备注</th>
+			</tr>
+			</thead>
+			<tbody id="tBody">
+			<tr th:each="customer:${session.pageInfo.list}">
+				<td><input type="checkbox" id="qx" name="mycc" th:value="${customer.id}" th:attr="data-id=${customer.id}"/></td>
+				<!-- <td th:text="${#calendars.format(#calendars.createNow(),'yyyy-MM-dd')}" ></td> -->
+				<!-- <td th:text="${customerStat.index}" ></td> -->
+				<td th:text="${customerStat.count}" ></td>
+				<td th:text="${customer.name}" ></td>
+				<td th:text="${customer.creDate}"></td>
+				<td><a href="">备注</a></td>
+			</tr>
+			</tbody>
+		</table>
+    </div>
+    <!-- a1展示分页1 -->
+    <!-- <div class="mypostion">
+		<nav aria-label="Page navigation">
+  			<ul class="pager">
+    			<li ><a th:href="@{/customer/findPageByPre.do(pageNum=${session.pageInfo.prePage})}">Previous</a></li>
+    			<li ><a th:href="@{/customer/findPageByPre.do(pageNum=${session.pageInfo.nextPage})}">Next</a></li>
+  			</ul>
+		</nav>
+ 	</div> -->
+ 	
+ 	<!-- a2展示分页2 -->
+ 	<div class="mypostion">
+		<nav aria-label="Page navigation">
+		  <ul class="pagination">
+		    <li >
+		      <a th:href="@{/customer/findPageByPre.do(pageNum=${session.pageInfo.prePage})}" aria-label="Previous">
+		        <span aria-hidden="true">&laquo;</span>
+		      </a>
+		    </li>
+		    <li th:each="eachPage:${session.pageInfo.navigatepageNums}"><a th:href="@{/customer/findPageByPre.do(pageNum=${eachPage})}">[[${eachPage}]]</a></li>
+		    <li>
+		      <a th:href="@{/customer/findPageByPre.do(pageNum=${session.pageInfo.nextPage})}" aria-label="Next">
+		        <span aria-hidden="true">&raquo;</span>
+		      </a>
+		    </li>
+		  </ul>
+		</nav>
+ 	</div>
+ 	
+ 	<!-- Modal_add -->
+	<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="myModalLabel">新增客户信息</h4>
+	      </div>
+	      <div class="modal-body">
+	      <form th:action="@{/customer/add.do}" method="post" id="addCustomerForm">
+			
+		    <p>请输入客户名称：<input type="text" name="name" id="add_nameId" /><span id="add_msg"></span></p>
+			<p>请输入引入时间：<input type="date" name="creDate" id="creDateId" class="onlyNum" /></p>
+			
+			<!--<p><button type="submit" id="submitBtn">提交表单</button></p>
+				<p><input type="submit" id="submitBtn" value="提交表单"> </p>-->
+			</form>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+	        <button type="button" id="saveConfirmBtn" class="btn btn-primary">保存</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+ 	
+ 	<!-- Modal_edit -->
+	<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="myModalLabel">修改客户信息</h4>
+	      </div>
+	      <div class="modal-body">
+	      <form th:action="@{/customer/updateById.do}"  method="post" id="editCustomerForm" >
+			
+			<p><input type="hidden" name="id" id="edit_customerId" value="" readonly="readonly"></p>
+		    <p>请修改客户名称：<input type="text" name="name"  id="edit_nameId" value=""  /><span id="edit_msg"></span></p>
+			<p>请修改引入时间：<input type="date" name="creDate" id="edit_creDateId" value=""  /></p>
+			
+			</form>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+	        <button type="button" id="editConfirmBtn" class="btn btn-primary" data-dismiss="modal">保存</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+ 	
+ 	<!-- Modal_import -->
+	<div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="addLabel">
+	  <div class="modal-dialog" role="document">
+	    <div class="modal-content">
+	      <div class="modal-header">
+	        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	        <h4 class="modal-title" id="myModalLabel">向数据库中添加信息</h4>
+	      </div>
+	      <div class="modal-body">
+	      <form th:action="@{/customer/importExcelData.do}" method="post" enctype="multipart/form-data" id="importCustomerForm">
+			
+		    <p>请导放文件名：<input type="file" name="file" id="add_nameId" /><span id="add_msg"></span></p>
+	
+			</form>
+	      </div>
+	      <div class="modal-footer">
+	        <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+	        <button type="button" id="importConfirmBtn" class="btn btn-primary">上传</button>
+	      </div>
+	    </div>
+	  </div>
+	</div>
+ 	
+ 	
+ 	
+ 	
+ 	<div th:if="${session.customer}!=null" th:text="${session.customer.id}">Test</div>
+ 	
+   <div th:insert="/common/footer::copyFragment">&copy; 2011 The Static Templates</div>
+  
+ </body>
+  
+</html>
+
