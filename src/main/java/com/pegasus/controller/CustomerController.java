@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ObjectUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -28,7 +29,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.pegasus.common.constant.PaginationConstant;
 import com.pegasus.dao.CustomerMapper;
 import com.pegasus.domain.Customer;
 import com.pegasus.domain.Material;
@@ -46,16 +49,16 @@ public class CustomerController {
 	private ICustomerService customerService;
 		
 	@RequestMapping("/add.do")
-	public String addCustomer(@ModelAttribute Customer customer, Errors errors){
+	public String addCustomer(int pageNum,@ModelAttribute Customer customer, Errors errors){
 		//1服务器端的校验
 		if(errors.hasErrors()) {
 			System.out.println("*******************************");
 			System.out.println(errors);
 			System.out.println("*******************************");
-			return "redirect:/customer/findPageByPre.do";
+			return "redirect:/customer/findPageByPage";
 		}
 		customerMapper.insertCustomer(customer);
-		return "redirect:/customer/findPageByPre.do";
+		return "redirect:/customer/findPageByPre.do?pageNum="+pageNum;
 	}
 	@RequestMapping("/deleteById.do")
 	@ResponseBody
@@ -85,7 +88,7 @@ public class CustomerController {
 	}
 	
 	@RequestMapping("/updateById.do")
-	public String updateCustomerById(Customer customer,Errors errors) {
+	public String updateCustomerById(int pageNum,Customer customer,Errors errors) {
 		//1服务器端的校验
 		if(errors.hasErrors()) {
 			System.out.println("*******************************");
@@ -96,7 +99,7 @@ public class CustomerController {
 		
 		int row = customerMapper.updateCustomerById(customer);
 		System.out.println("成功修改："+row);
-		return "redirect:/customer/findPageByPre.do";
+		return "redirect:/customer/findPageByPre.do?pageNum="+pageNum;
 	}
 	
 	@RequestMapping("/findAll.do")
@@ -127,9 +130,16 @@ public class CustomerController {
 	}
 	
 	@RequestMapping("/findPageByPre.do")
-	public String getPage(@RequestParam(defaultValue="1") int pageNum,HttpSession session) {
+	public String getPage(Integer pageNum,HttpSession session,Model model) {
 		
-		PageInfo<Customer> pageInfo = customerService.findCustomerByPage(pageNum, PAGE_SIZE);
+		if(ObjectUtils.isEmpty(pageNum)){
+			pageNum=PaginationConstant.PAGE_NUM;
+		}
+		
+		PageHelper.startPage(pageNum, PaginationConstant.PAGE_SIZE);
+		List<Customer> customers = customerService.findCustomerAll();
+		PageInfo<Customer> pageInfo = new PageInfo<>(customers);
+		/*PageInfo<Customer> pageInfo = customerService.findCustomerByPage(pageNum, PAGE_SIZE);
 		int prePage = pageInfo.getPrePage();
 		if(prePage==0) {
 			pageInfo.setPrePage(pageInfo.getPageNum());
@@ -140,7 +150,9 @@ public class CustomerController {
 			pageInfo.setNextPage(pageInfo.getPages());
 		}
 		session.setAttribute("pageInfo", pageInfo);
-		
+		model.addAttribute("pageInfo", pageInfo);*/
+		//session.setAttribute("pageInfo", pageInfo);
+		model.addAttribute("pageInfo", pageInfo);
 		return "/home";
 	}
 	@RequestMapping("/exportAll.do")

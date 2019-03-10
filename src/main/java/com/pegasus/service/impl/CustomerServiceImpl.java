@@ -130,5 +130,10 @@ public class CustomerServiceImpl implements ICustomerService{
         }
         return notNull;
 	}
+	@Override
+	public List<Customer> findCustomerAll() {
+		List<Customer> customers = customerMapper.findAll();
+		return customers;
+	}
 	
 }

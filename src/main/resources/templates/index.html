@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+
+ <head th:replace="/common/common :: common_header(~{::title},~{::link},~{::script})">
+ <title>SUCCESS</title>
+ <link rel="stylesheet" th:href="@{/css/style.css}">
+ <script type="text/javascript" th:inline="javascript">
+ 
+	$(function(){
+		window.location.href="/springboot/customer/findPageByPre.do";
+	})
+</script>
+</head>
+
+ <body>
+	<div th:include="common/header::headerFragment"></div>
+	
+	 
+	<div th:insert="common/footer::copyFragment">&copy; 2011 The Static Templates</div>
+ </body>
+  
+</html>
+

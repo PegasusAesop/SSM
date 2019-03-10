@@ -8,10 +8,9 @@
  <!-- <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"> -->
  <link rel="stylesheet" th:href="@{/css/style.css}">
  
- <script type="text/javascript">
- 
+ <script type="text/javascript" th:inline="javascript" >
 	 $(function(){
-		 //
+		 //0js功能，变换图片；
 		 setInterval(showImg,3000);
 		 //0新增修改时name值验证；
 		 validate("#add_nameId","#add_msg");
@@ -19,8 +18,15 @@
 		 //listAll("#tBody");
 		 //1增加项目
 		 $("#saveConfirmBtn").click(function(){
-			//alert(1111);
-			$("#addCustomerForm").submit();
+			 //layer.js显示插件；
+			 $("#addCustomerForm").submit();	
+			 layer.msg("添加成功！",{
+					time:5000,
+					skin:'successMsg',
+				},
+				function(){
+					//
+				});
 		})
 		//2删除一条或多条项目
 		$("#delItems").click(function(){
@@ -37,7 +43,7 @@
 				this.disabled=true;
 			}
 		})
-		//4选中部分项目，转化为excel并导出到本地；
+		//5选中部分项目，转化为excel并导出到本地；
 		$("#exportCkdBtn").click(function(){
 			if($(":checkbox[name='mycc']:checked").length==0){
 				alert("请确保至少选 中一条项目...");
@@ -50,21 +56,44 @@
 				});
 				sendData = sendData.substr(1);
 				window.location.href="exportCkdAll.do?"+sendData;
-				
-				
 			}else{
 				$("input[name='mycc']:checked").attr("checked",false);
 				window.location.href=window.location.href;
 			}
 		})
 		
+		//6excel文件导入并添加或更新到数据库中；
 		$("#importConfirmBtn").click(function(){
-			
 			$("#importCustomerForm").submit();
 		})
+		//7bootstrap-paginator前端分页插件应用；
+		$("#pagination").bootstrapPaginator({
+			 bootstrapMajorVersion:3,
+			 currentPage:[[${pageInfo.pageNum}]],
+			 totalPages:[[${pageInfo.pages}]],
+			 itemTexts:function(type,page,current){
+				 switch(type){
+				 case 'first':
+					 return "首页";
+				 case 'prev':
+					 return "前一页";
+				 case "next":
+					 return "下一页";
+				 case "last":
+					 return "末页";
+				 case "page":
+					 return page;
+				 } 
+			 },
+			pageUrl:function(type,page,current){
+				return "/springboot/customer/findPageByPre.do?pageNum="+page;
+			},
+		 })
+		//
 		
-	 })
+	 });
 	 
+
 	 function showImg(){
 		 var number=Math.ceil(Math.random()*6);//aa有几张图片就乘以几；
 		 //1两种方法
@@ -146,7 +175,6 @@
 		}
 		
 		function OriginalValues(){
-			
 			 var $chkBoxes = $("#customerTable").find("input:checked");
 			 if($chkBoxes.length!=1){
 				 alert("没有选数据或超过了一条数据...");
@@ -191,9 +219,8 @@
 					},
 					dataType:"text",
 					error:function(){
-						
 						alert("confirm the servce is starting!");
-					}
+					},
 				})
 			})
 		}
@@ -247,8 +274,8 @@
 		</button>
 	</div>
     <!-- aa表格显示 -->
-    <div class="mypostion">  
-	    <table class="table table-hover" id="customerTable" style="font-size:16px;">
+    <div class="show-list text-center">  
+	    <table class="table table-bordered table-hover" id="customerTable" style="font-size:16px;">
 			<thead>
 			<tr>
 				<!-- <td><input type="checkbox" id="qx" /></td> -->
@@ -260,7 +287,7 @@
 			</tr>
 			</thead>
 			<tbody id="tBody">
-			<tr th:each="customer:${session.pageInfo.list}">
+			<tr th:each="customer:${pageInfo.list}">
 				<td><input type="checkbox" id="qx" name="mycc" th:value="${customer.id}" th:attr="data-id=${customer.id}"/></td>
 				<!-- <td th:text="${#calendars.format(#calendars.createNow(),'yyyy-MM-dd')}" ></td> -->
 				<!-- <td th:text="${customerStat.index}" ></td> -->
@@ -271,6 +298,8 @@
 			</tr>
 			</tbody>
 		</table>
+		<!-- a3 bootstrap-paginator.js前端框架 -->
+ 		<ul id="pagination"></ul>
     </div>
     <!-- a1展示分页1 -->
     <!-- <div class="mypostion">
@@ -283,7 +312,7 @@
  	</div> -->
  	
  	<!-- a2展示分页2 -->
- 	<div class="mypostion">
+ 	<!-- <div class="mypostion">
 		<nav aria-label="Page navigation">
 		  <ul class="pagination">
 		    <li >
@@ -299,7 +328,8 @@
 		    </li>
 		  </ul>
 		</nav>
- 	</div>
+ 	</div> -->
+ 	
  	
  	<!-- Modal_add -->
 	<div class="modal fade" id="addModal" tabindex="-1" role="dialog" aria-labelledby="addLabel">
@@ -310,7 +340,7 @@
 	        <h4 class="modal-title" id="myModalLabel">新增客户信息</h4>
 	      </div>
 	      <div class="modal-body">
-	      <form th:action="@{/customer/add.do}" method="post" id="addCustomerForm">
+	      <form th:action="@{/customer/add.do(pageNum=${pageInfo.pageNum})}" method="post" id="addCustomerForm">
 			
 		    <p>请输入客户名称：<input type="text" name="name" id="add_nameId" /><span id="add_msg"></span></p>
 			<p>请输入引入时间：<input type="date" name="creDate" id="creDateId" class="onlyNum" /></p>
@@ -336,7 +366,7 @@
 	        <h4 class="modal-title" id="myModalLabel">修改客户信息</h4>
 	      </div>
 	      <div class="modal-body">
-	      <form th:action="@{/customer/updateById.do}"  method="post" id="editCustomerForm" >
+	      <form th:action="@{/customer/updateById.do(pageNum=${pageInfo.pageNum})}"  method="post" id="editCustomerForm" >
 			
 			<p><input type="hidden" name="id" id="edit_customerId" value="" readonly="readonly"></p>
 		    <p>请修改客户名称：<input type="text" name="name"  id="edit_nameId" value=""  /><span id="edit_msg"></span></p>

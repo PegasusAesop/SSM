@@ -8,6 +8,8 @@ import com.github.pagehelper.PageInfo;
 import com.pegasus.domain.Customer;
 
 public interface ICustomerService {
+	
+	List<Customer> findCustomerAll();
 
 	PageInfo<Customer> findCustomerByPage(int pageNum,int pageSize);
 
